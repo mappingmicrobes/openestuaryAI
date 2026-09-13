@@ -91,12 +91,19 @@ if (!file.exists(model_path)) {
   message(model_download_url)
   message("This is a large file and may take several minutes.")
 
+  old_timeout <- getOption("timeout")
+  options(timeout = max(3600, old_timeout))
+  if (file.exists(model_path)) {
+    unlink(model_path)
+  }
+
   download_result <- tryCatch(
     {
       download.file(
         url = model_download_url,
         destfile = model_path,
         mode = "wb",
+        method = "auto",
         quiet = FALSE
       )
       TRUE
@@ -106,6 +113,7 @@ if (!file.exists(model_path)) {
       FALSE
     }
   )
+  options(timeout = old_timeout)
 
   if (!download_result || !file.exists(model_path)) {
     stop(
