@@ -55,23 +55,66 @@ clamp_salinity <- TRUE
 # ---------------------------------------------------------------------------
 
 project_dir <- getwd()
-emulator_dir <- file.path(project_dir, "Estuary-Emulator")
+
+# This lets the script work in either layout:
+#   openestuaryAI/run_v3_scenario.R
+# or:
+#   openestuaryAI/Estuary-Emulator/run_v3_scenario.R
+if (file.exists(file.path(project_dir, "run_v3_scenario.R"))) {
+  emulator_dir <- project_dir
+} else if (dir.exists(file.path(project_dir, "Estuary-Emulator"))) {
+  emulator_dir <- file.path(project_dir, "Estuary-Emulator")
+} else {
+  emulator_dir <- project_dir
+}
+
 model_path <- file.path(emulator_dir, "models", "v3_discharge_plume_model.rds")
 output_dir <- file.path(emulator_dir, "outputs", "user_scenarios")
 dir.create(output_dir, recursive = TRUE, showWarnings = FALSE)
+dir.create(dirname(model_path), recursive = TRUE, showWarnings = FALSE)
 
 prediction_csv_path <- file.path(output_dir, paste0(scenario_name, "_predicted_salinity.csv"))
 plume_csv_path <- file.path(output_dir, paste0(scenario_name, "_plume_metrics.csv"))
 figure_path <- file.path(output_dir, paste0(scenario_name, "_predicted_salinity.png"))
 geojson_path <- file.path(output_dir, paste0(scenario_name, "_predicted_salinity.geojson"))
 
+model_download_url <- paste0(
+  "https://github.com/mappingmicrobes/openestuaryAI/releases/download/",
+  "v0.1-test-emulator/v3_discharge_plume_model.rds"
+)
+
 if (!file.exists(model_path)) {
-  stop(
-    "Model file not found: ",
-    model_path,
-    "\nDownload or copy v3_discharge_plume_model.rds into Estuary-Emulator/models/.",
-    call. = FALSE
+  message("Model file not found:")
+  message(model_path)
+  message("")
+  message("Downloading trained V3 model from:")
+  message(model_download_url)
+  message("This is a large file and may take several minutes.")
+
+  download_result <- tryCatch(
+    {
+      download.file(
+        url = model_download_url,
+        destfile = model_path,
+        mode = "wb",
+        quiet = FALSE
+      )
+      TRUE
+    },
+    error = function(e) {
+      message("Model download failed: ", conditionMessage(e))
+      FALSE
+    }
   )
+
+  if (!download_result || !file.exists(model_path)) {
+    stop(
+      "Could not download the model file.\n",
+      "Download it manually from the GitHub Release and place it here:\n",
+      model_path,
+      call. = FALSE
+    )
+  }
 }
 
 if (!requireNamespace("ranger", quietly = TRUE)) {
