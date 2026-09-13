@@ -1,0 +1,28 @@
+# Raw MIKE/model files should not be committed.
+*.xyz
+*.dfsu
+*.dfs1
+*.dxfm
+*.mesh
+
+# Large trained models need Git LFS or GitHub Releases.
+models/*.rds
+models/*.joblib
+
+# Local outputs can be regenerated. Keep selected publication outputs only when
+# intentionally adding them to a release.
+outputs/user_scenarios/
+outputs/*_holdout_predictions.csv
+outputs/*_validation_predictions.csv
+outputs/*_scenario_predictions.csv
+outputs/v3_leaflet_satellite_validation_map_files/
+outputs/validation_points_docx_images/
+
+# R/Python/editor noise.
+.Rhistory
+.RData
+.Rproj.user/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
