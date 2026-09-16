@@ -64,6 +64,12 @@ setwd("path/to/openestuaryAI")
 
 ## Run The Emulator
 
+Open the scenario script if you want to review or edit the settings first:
+
+```r
+file.edit("run_v3_scenario.R")
+```
+
 From inside the repository folder, run:
 
 ```r
